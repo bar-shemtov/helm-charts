@@ -42,13 +42,17 @@ pipeline {
         
         stage('Push Index.yaml') {
             steps {
-                container('helm-jenkins-agent') {
-                    withCredentials([string(credentialsId: env.GIT_CREDENTIALS_ID, variable: 'GIT_TOKEN')]) {
-                        sh 'git config --global user.email "jenkins@cluster.com"'
-                        sh 'git config --global user.name "Jenkins Automation"'
-                        sh 'git add .'
-                        sh 'git commit -m "Update Helm charts" || true'
-                        sh "git push https://${GIT_TOKEN}@github.com/bar-shemtov/helm-charts.git main"
+                script {
+                    // Configure Git identity
+                    gitConfigureGlobal(userEmail: 'jenkins@cluster.com', userName: 'Jenkins Automation')
+
+                    // Add and commit changes
+                    sh 'git add .'
+                    sh 'git commit -m "Update Helm charts" || true'  // Continue even if no changes
+
+                    // Push changes using GitHub Push Plugin with Username with password credentials
+                    withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh "git push https://${USERNAME}:${PASSWORD}@github.com/bar-shemtov/helm-charts.git main"
                     }
                 }
             }
