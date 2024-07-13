@@ -43,17 +43,16 @@ pipeline {
             }
         }
         
-        stage('Push Index.yaml') {
+        stage('Push to main') {
             steps {
                 container('helm-jenkins-agent') {
                     // Configure Git identity
-                    sh 'git config --global user.email "jenkins@cluster.com"'
-                    sh 'git config --global user.name "Jenkins Automation"'
+                    gitConfigureGlobal(userEmail: 'jenkins@cluster.com', userName: 'Jenkins Automation')
                     
                     // Add and commit changes
                     sh 'git add .'
                     sh 'git commit -m "Update Helm charts" || true'  // Continue even if no changes
-                    sh 'git push origin main'
+                    githubPush(credentialsId: env.GIT_CREDENTIALS_ID)
                 }
             }
         }
