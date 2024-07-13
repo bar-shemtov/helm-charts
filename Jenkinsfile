@@ -1,7 +1,6 @@
 pipeline {
     agent {
         kubernetes {
-            // Define the Kubernetes agent configuration
             label 'helm-agent'
             containerTemplate {
                 name 'helm-jenkins-agent'
@@ -21,8 +20,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the main branch
-                git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, 
-                url: env.REPO_URL
+                git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, url: env.REPO_URL
             }
         }
         
@@ -35,6 +33,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Create Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
@@ -43,18 +42,21 @@ pipeline {
                 }
             }
         }
-        stage('Push Index.yaml') { 
+        
+        stage('Push Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
                     // Configure Git identity
                     sh 'git config --global user.email "jenkins@cluster.com"'
                     sh 'git config --global user.name "Jenkins Automation"'
+                    
                     // Add and commit changes
                     sh 'git add .'
-                    sh 'git commit -m "Update Helm charts" || true'
+                    sh 'git commit -m "Update Helm charts" || true'  // Continue even if no changes
                     sh 'git push origin main'
                 }
             }
+        }
     }
     
     post {
@@ -63,7 +65,6 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
-            }
         }
     }
 }
