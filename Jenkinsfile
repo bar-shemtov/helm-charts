@@ -14,6 +14,7 @@ pipeline {
     environment {
         GIT_CREDENTIALS_ID = 'ec5690e5-cb8b-495b-8ed5-3ee490e57b12'
         REPO_URL = 'https://github.com/bar-shemtov/helm-charts.git'
+        REPO_URL_PUSH = 'github.com/bar-shemtov/helm-charts.git'
     }
 
     stages {
@@ -49,7 +50,7 @@ pipeline {
                         sh "git config --global user.name 'Jenkins Automation'"
                         sh "git add ."
                         sh "git commit -m 'Update Helm repo index.yaml' || true"  // Continue even if no changes
-                        sh "git push https://${USERNAME}:${PASSWORD}@${env.REPO_URL} main"
+                        sh "git push https://${USERNAME}:${PASSWORD}@${env.REPO_URL_PUSH} main"
                     }
                 }
             }
