@@ -31,9 +31,9 @@ pipeline {
                     sh 'helm package charts/sptr-frontend'
                     
                     // Move Helm chart files to gh-pages folder
-                    sh 'mkdir -p gh-pages'
-                    sh 'cp sptr-backend-0.1.0.tgz gh-pages/'
-                    sh 'cp sptr-frontend-0.1.0.tgz gh-pages/'
+                    sh 'mkdir -p docs'
+                    sh 'mv sptr-backend-0.1.0.tgz docs/'
+                    sh 'mv sptr-frontend-0.1.0.tgz docs/'
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         stage('Create Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
-                    sh 'helm repo index --url https://bar-shemtov.github.io/helm-charts ./gh-pages'
+                    sh 'helm repo index --url https://bar-shemtov.github.io/helm-charts ./docs'
                 }
             }
         }
