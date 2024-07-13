@@ -16,6 +16,10 @@ pipeline {
         GIT_CREDENTIALS_ID = 'ec5690e5-cb8b-495b-8ed5-3ee490e57b12'
         REPO_URL = 'https://github.com/bar-shemtov/helm-charts.git'
         GH_PAGES_BRANCH = 'gh-pages'
+        
+        // Git configuration
+        GIT_EMAIL = 'baris841@gmail.com'
+        GIT_NAME = 'Bar Shem-Tov'
     }
 
     stages {
@@ -24,6 +28,16 @@ pipeline {
                 // Checkout the main branch
                 git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, 
                 url: env.REPO_URL
+            }
+        }
+        
+        stage('Configure Git') {
+            steps {
+                // Set Git global configuration
+                withEnv(['GIT_COMMITTER_EMAIL=${env.GIT_EMAIL}', 'GIT_COMMITTER_NAME=${env.GIT_NAME}']) {
+                    sh 'git config --global user.email "${env.GIT_EMAIL}"'
+                    sh 'git config --global user.name "${env.GIT_NAME}"'
+                }
             }
         }
         
@@ -56,19 +70,18 @@ pipeline {
             steps {
                 container('helm-jenkins-agent') {
                     dir('gh-pages') {
-                        // Checkout the gh-pages branch
-                        checkout([
-                            $class: 'GitSCM',
-                            branches: [[name: env.GH_PAGES_BRANCH]],
-                            doGenerateSubmoduleConfigurations: false,
-                            extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gh-pages']],
-                            submoduleCfg: [],
-                            userRemoteConfigs: [[
-                                credentialsId: env.GIT_CREDENTIALS_ID,
-                                url: env.REPO_URL
-                            ]]
-                        ])
-
+                        // Check if the branch exists locally
+                        script {
+                            def branchExists = sh(script: 'git show-ref --verify refs/heads/gh-pages', returnStatus: true)
+                            if (branchExists != 0) {
+                                // If branch does not exist locally, create it
+                                sh 'git checkout -b gh-pages'
+                            } else {
+                                // If branch exists, checkout to it
+                                sh 'git checkout gh-pages'
+                            }
+                        }
+                        
                         // Add and commit changes
                         sh 'git add .'
                         sh 'git commit -m "Update Helm charts" || true'
