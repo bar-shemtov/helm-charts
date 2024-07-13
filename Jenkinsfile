@@ -19,7 +19,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the main branch
                 git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, url: env.REPO_URL
             }
         }
@@ -27,7 +26,6 @@ pipeline {
         stage('Build Helm Charts') {
             steps {
                 container('helm-jenkins-agent') {
-                    // Build Helm charts
                     sh 'helm package charts/sptr-backend'
                     sh 'helm package charts/sptr-frontend'
                 }
@@ -37,27 +35,20 @@ pipeline {
         stage('Create Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
-                    // Generate index.yaml
                     sh 'helm repo index --url https://bar-shemtov.github.io/helm-charts .'
                 }
             }
         }
         
-        stage('Push to main') {
+        stage('Push Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
-                                script {
-                        // Configure Git identity
-                        gitConfigureGlobal(userEmail: 'jenkins@cluster.com', userName: 'Jenkins Automation')
-
-                        // Add and commit changes
+                    withCredentials([string(credentialsId: env.GIT_CREDENTIALS_ID, variable: 'GIT_TOKEN')]) {
+                        sh 'git config --global user.email "jenkins@cluster.com"'
+                        sh 'git config --global user.name "Jenkins Automation"'
                         sh 'git add .'
-                        sh 'git commit -m "Update Helm charts" || true'  // Continue even if no changes
-
-                        // Push changes using GitHub Push Plugin
-                        withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            sh "git push https://${USERNAME}:${PASSWORD}@github.com/bar-shemtov/helm-charts.git main"
-                        }
+                        sh 'git commit -m "Update Helm charts" || true'
+                        sh "git push https://${GIT_TOKEN}@github.com/bar-shemtov/helm-charts.git main"
                     }
                 }
             }
