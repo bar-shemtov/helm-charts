@@ -49,7 +49,7 @@ pipeline {
                         sh "git config --global user.name 'Jenkins Automation'"
                         sh "git add ."
                         sh "git commit -m 'Update Helm repo index.yaml' || true"  // Continue even if no changes
-                        sh "git push https://${USERNAME}:${PASSWORD}@${env.GIT_REPO} main"
+                        sh "git push https://${USERNAME}:${PASSWORD}@${env.REPO_URL} main"
                     }
                 }
             }
