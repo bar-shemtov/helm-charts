@@ -25,9 +25,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the main branch
-                git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, 
-                url: env.REPO_URL
+                // Clone the repository with both branches
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'main'], [name: 'gh-pages']],
+                          userRemoteConfigs: [[
+                              url: env.REPO_URL,
+                              credentialsId: env.GIT_CREDENTIALS_ID
+                          ]]])
             }
         }
         
@@ -54,9 +58,6 @@ pipeline {
         stage('Create and Push Index.yaml') {
             steps {
                 container('helm-jenkins-agent') {
-                    // Initialize gh-pages branch directory
-                    sh 'mkdir -p gh-pages'
-                    
                     // Copy packaged charts to gh-pages directory
                     sh 'cp *.tgz gh-pages/'
                     
@@ -70,25 +71,17 @@ pipeline {
             steps {
                 container('helm-jenkins-agent') {
                     dir('gh-pages') {
-                        // Check if the branch exists locally
-                        script {
-                            def branchExists = sh(script: 'git show-ref --verify refs/heads/gh-pages', returnStatus: true)
-                            if (branchExists != 0) {
-                                // If branch does not exist locally, create it
-                                sh 'git checkout -b gh-pages'
-                            } else {
-                                // If branch exists, checkout to it
-                                sh 'git checkout gh-pages'
-                            }
-                        }
-                        
                         // Add and commit changes
                         sh 'git add .'
                         sh 'git commit -m "Update Helm charts" || true'
-
-                        // Push changes to gh-pages branch
+                        
+                        // Push changes using Git plugin
                         withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                            sh 'git push https://' + env.GIT_USERNAME + ':' + env.GIT_PASSWORD + '@github.com/bar-shemtov/helm-charts.git ' + env.GH_PAGES_BRANCH
+                            git push {
+                                credentialsId(env.GIT_CREDENTIALS_ID)
+                                branch(env.GH_PAGES_BRANCH)
+                                url(env.REPO_URL)
+                            }
                         }
                     }
                 }
