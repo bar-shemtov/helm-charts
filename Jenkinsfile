@@ -20,7 +20,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: env.GIT_CREDENTIALS_ID, url: env.REPO_URL
+                checkout scm
+                echo "Completed checkout"
             }
         }
         
@@ -32,8 +33,8 @@ pipeline {
                     
                     // Move Helm chart files to gh-pages folder
                     sh 'mkdir -p docs'
-                    sh 'mv sptr-backend-0.1.0.tgz docs/'
-                    sh 'mv sptr-frontend-0.1.0.tgz docs/'
+                    sh 'mv sptr-backend-*.tgz docs/'
+                    sh 'mv sptr-frontend-*.tgz docs/'
                 }
             }
         }
