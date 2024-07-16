@@ -3,9 +3,9 @@ entries:
   sptr-backend:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-16T09:14:07.006500236Z"
+    created: "2024-07-16T10:07:23.851619839Z"
     description: A Helm chart for Kubernetes
-    digest: 969ed2b7eb4e02aeaa1dedcc85fffb7bbb2e40320ce25b528a67163e365a2ad6
+    digest: 8362428b422655c29a29b91d5bd5177e97a539ac9e25f1cfb28fefc6162d1999
     name: sptr-backend
     type: application
     urls:
@@ -14,7 +14,7 @@ entries:
   sptr-frontend:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-16T09:14:07.006841569Z"
+    created: "2024-07-16T10:07:23.851901798Z"
     description: A Helm chart for Kubernetes
     digest: 661148161f7862d35d96070eb6906871ae0125491727a5e9fa8506a85337900b
     name: sptr-frontend
@@ -22,4 +22,4 @@ entries:
     urls:
     - https://bar-shemtov.github.io/helm-charts/sptr-frontend-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-16T09:14:07.006018027Z"
+generated: "2024-07-16T10:07:23.851211589Z"
